@@ -1,11 +1,16 @@
 #include <stdlib.h>
 #include <stdio.h>
-#include <arpa/inet.h>
 #include <string.h>
 #include <errno.h>
+#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
+#include <winsock.h>
+#else
+#include <arpa/inet.h>
+#endif
 #include <unistd.h>
 #include "m4asm.h"
 #include "insns.h"
+
 
 void usage(char** argv) {
     fprintf(stderr, "Usage: %s [-i file] [-o file]\n", argv[0]);
