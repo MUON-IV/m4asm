@@ -59,6 +59,49 @@
 #define OPC_NAND_RR 0x23
 #define OPC_NAND_RI 0x24
 
+// PUSH
+#define OPC_PUSHB_FAR 0x25
+#define OPC_PUSHW_FAR 0x27
+#define OPC_PUSHW_NEAR 0x3A
+#define OPC_PUSH_REG 0x2A
+
+// SSP
+#define OPC_SSP 0x29
+
+// POP
+#define OPC_POP_REG 0x2B
+#define OPC_POP_FAR 0x2C
+#define OPC_POP_AD 0x2E
+#define OPC_POP_NEAR 0x3C
+
+// CALL
+#define OPC_CALL_FAR 0x31
+#define OPC_CALL_NEAR 0xE0
+
+// RET
+#define OPC_RET 0x33
+
+// IEN
+#define OPC_IEN 0x3E
+
+// SINT
+#define OPC_SINT 0x34
+
+// MMOV
+#define OPC_MMOV_ST 0x40
+#define OPC_MMOV_LD 0x41
+
+// IMOV
+#define OPC_IMOV_LD 0x4A
+#define OPC_IMOV_ST 0x4B
+#define OPC_IMOV_ST_IMM 0x4C
+
+// BRCH
+#define OPC_BRCH_FLG_FAR 0x42
+#define OPC_BRCH_FLG_NEAR 0x44
+#define OPC_BRCH_IV_FAR 0x46
+#define OPC_BRCH_IV_NEAR 0x48
+
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 
@@ -135,6 +178,39 @@ static struct insn_def_t insns[] = {
     {"xor"  , OPC_XOR_RI        , 2, 2, "RW"},
     {"nand" , OPC_NAND_RI       , 2, 2, "RW"},
     {"xnor" , OPC_XNOR_RI       , 2, 2, "RW"},
+
+    {"pushb", OPC_PUSHB_FAR     , 3, 5, "f"},
+    {"push" , OPC_PUSHW_FAR     , 3, 5, "f"},
+    {"push" , OPC_PUSHW_NEAR    , 2, 5, "n"},
+    {"push" , OPC_PUSH_REG      , 1, 2, "R"},
+
+    {"ssp"  , OPC_SSP           , 3, 3, "D"},
+
+    {"pop"  , OPC_POP_REG       , 1, 3, "R"},
+    {"pop"  , OPC_POP_FAR       , 3, 6, "f"},
+    {"popad", OPC_POP_AD        , 4, 1, ""},
+    {"pop"  , OPC_POP_NEAR      , 6, 2, "n"},
+
+    {"call" , OPC_CALL_FAR      , 3, 5, "D"},
+    {"call" , OPC_CALL_NEAR     , 2, 5, "W"},
+
+    {"ret"  , OPC_RET           , 1, 6, ""},
+
+    {"ien"  , OPC_IEN           , 1, 1, ""},
+
+    {"sint" , OPC_SINT          , 1, 1, ""},
+
+    {"mmov" , OPC_MMOV_ST       , 3, 4, "fR"},
+    {"mmov" , OPC_MMOV_LD       , 3, 4, "Rf"},
+
+    {"imov" , OPC_IMOV_LD       , 3, 4, "Rf"},
+    {"imov" , OPC_IMOV_ST       , 3, 4, "fR"},
+    {"imov" , OPC_IMOV_ST_IMM   , 4, 6, "fW"},
+
+    {"brchf", OPC_BRCH_FLG_FAR  , 3, 5, "DW"},
+    {"brchf", OPC_BRCH_FLG_NEAR , 2, 5, "WW"},
+    {"brchi", OPC_BRCH_IV_FAR   , 3, 5, "DW"},
+    {"brchi", OPC_BRCH_IV_NEAR  , 2, 5, "WW"},
 
     {(char*)NULL, 0, 0, 0, (char*)NULL}, // terminator
 };

@@ -2,3 +2,4 @@
 .vscode
 *.bin
 m4asm
+build

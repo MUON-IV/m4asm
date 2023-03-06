@@ -307,6 +307,148 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             ret.data[1] = l16(p1);
             break;
 
+        // PUSH
+        case OPC_PUSHB_FAR: // p0: address to fetch byte from
+            ret.length = 3;
+            ret.data[0] = htons(OPC_PUSHB_FAR);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_PUSHW_FAR: // p0: address to fetch word from
+            ret.length = 3;
+            ret.data[0] = htons(OPC_PUSHW_FAR);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_PUSHW_NEAR: // p0: near address to fetch word from
+            ret.length = 2;
+            ret.data[0] = htons(OPC_PUSHW_NEAR);
+            ret.data[1] = l16(p0);
+            break;
+        case OPC_PUSH_REG: // p0: reg ID
+            ret.length = 1;
+            ret.data[0] = htons(OPC_PUSH_REG) | htons((p0&0xF)<<8);
+            break;
+        
+        // SSP
+        case OPC_SSP: // p0: address to put stack
+            ret.length = 3;
+            ret.data[0] = htons(OPC_SSP);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+
+        // POP
+        case OPC_POP_REG: // p0: regid
+            ret.length = 1;
+            ret.data[0] = htons(OPC_POP_REG) | htons((p0&0xF)<<8);
+            break;
+        case OPC_POP_FAR: // p0: far address
+            ret.length = 3;
+            ret.data[0] = htons(OPC_POP_FAR);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_POP_AD: // popad
+            ret.length = 1;
+            ret.data[0] = htons(OPC_POP_AD);
+            break;
+        case OPC_POP_NEAR: // p0: near address
+            ret.length = 2;
+            ret.data[0] = htons(OPC_POP_NEAR);
+            ret.data[1] = l16(p0);
+            break;
+
+        // CALL
+        case OPC_CALL_FAR: // p0: far address
+            ret.length = 3;
+            ret.data[0] = htons(OPC_CALL_FAR);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_CALL_NEAR: // p0: near address
+            ret.length = 2;
+            ret.data[0] = htons(OPC_CALL_NEAR);
+            ret.data[1] = l16(p0);
+            break;
+
+        // RET
+        case OPC_RET:
+            ret.length = 1;
+            ret.data[0] = htons(OPC_RET);
+            break;
+
+        // IEN
+        case OPC_IEN:
+            ret.length = 1;
+            ret.data[0] = htons(OPC_IEN);
+            break;
+
+        // SINT
+        case OPC_SINT:
+            ret.length = 1;
+            ret.data[0] = htons(OPC_SINT);
+            break;
+
+        // MMOV
+        case OPC_MMOV_ST: // p0: destination mgmt addr, p1: source reg
+            ret.length = 3;
+            ret.data[0] = htons(OPC_MMOV_ST) | htons((p1&0xF)<<8);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_MMOV_LD: // p0: dest reg, p1: source mgmt addr
+            ret.length = 3;
+            ret.data[0] = htons(OPC_MMOV_LD) | htons((p0&0xF)<<8);
+            ret.data[1] = u16(p1);
+            ret.data[2] = l16(p1);
+            break;
+
+        // IMOV
+        case OPC_IMOV_LD: // p0: dest reg, p1: source addr
+            ret.length = 3;
+            ret.data[0] = htons(OPC_IMOV_LD) | htons((p0&0xF)<<8);
+            ret.data[1] = u16(p1);
+            ret.data[2] = l16(p1);
+            break;
+        case OPC_IMOV_ST: // p0: dest addr, p1: source reg
+            ret.length = 3;
+            ret.data[0] = htons(OPC_IMOV_ST) | htons((p1&0xF)<<8);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_IMOV_ST_IMM: // p0: dest addr, p1: imm value
+            ret.length = 4;
+            ret.data[0] = htons(OPC_IMOV_ST_IMM);
+            ret.data[1] = l16(p1);
+            ret.data[2] = u16(p0);
+            ret.data[3] = l16(p0);
+            break;
+
+        // BRCH
+        case OPC_BRCH_FLG_FAR: // p0: addr, p1: flags to test
+            ret.length = 3;
+            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xF)<<12);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_BRCH_FLG_NEAR: // p0: addr, p1: flags to test
+            ret.length = 2;
+            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xF)<<12);
+            ret.data[1] = l16(p0);
+            break;
+        case OPC_BRCH_IV_FAR: // p0: addr, p1: IV to test
+            ret.length = 3;
+            ret.data[0] = htons(OPC_BRCH_IV_FAR) | htons((p1&0xFF)<<8);
+            ret.data[1] = u16(p0);
+            ret.data[2] = l16(p0);
+            break;
+        case OPC_BRCH_IV_NEAR: // p0: addr, p1: IV to test
+            ret.length = 2;
+            ret.data[0] = htons(OPC_BRCH_IV_FAR) | htons((p1&0xFF)<<8);
+            ret.data[1] = l16(p0);
+            break;
+
         default:
             fprintf(stderr, "ERROR: Illegal instruction opcode=0x%04X\n",opcode);
             exit(EXIT_FAILURE);
