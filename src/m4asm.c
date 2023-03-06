@@ -4,10 +4,11 @@
 #include <errno.h>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #include <winsock.h>
+#include "getopt/getopt.h"
 #else
 #include <arpa/inet.h>
-#endif
 #include <unistd.h>
+#endif
 #include "m4asm.h"
 #include "insns.h"
 

@@ -5,4 +5,8 @@ project(
   VERSION 1.0
   LANGUAGES C)
 
+if (MSVC)
+add_executable(m4asm src/m4asm.c src/getopt/getopt.c)
+else()
 add_executable(m4asm src/m4asm.c)
+endif()
