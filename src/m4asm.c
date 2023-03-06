@@ -20,6 +20,9 @@ void usage(char** argv) {
 }
 
 int main(int argc, char** argv) {
+    printf("m4asm (C) Charlie Camilleri 2023\n");
+    printf("Version 0.9\n\n");
+
     char *infile = NULL;
     char *outfile = NULL;
     int opt;
