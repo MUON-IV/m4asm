@@ -102,6 +102,10 @@
 #define OPC_BRCH_IV_FAR 0x46
 #define OPC_BRCH_IV_NEAR 0x48
 
+// Special T,T+1 MOVs
+#define OPC_MOV_RSA 0x4F
+#define OPC_IMOV_RSA 0x4E
+
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 
@@ -211,6 +215,9 @@ static struct insn_def_t insns[] = {
     {"brchf", OPC_BRCH_FLG_NEAR , 2, 5, "WW"},
     {"brchi", OPC_BRCH_IV_FAR   , 3, 5, "DW"},
     {"brchi", OPC_BRCH_IV_NEAR  , 2, 5, "WW"},
+
+    {"emov" , OPC_MOV_RSA       , 1, 4, "RR"},
+    {"iemov", OPC_IMOV_RSA      , 1, 4, "RR"},
 
     {(char*)NULL, 0, 0, 0, (char*)NULL}, // terminator
 };
