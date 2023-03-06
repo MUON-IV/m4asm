@@ -5,6 +5,7 @@
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #include <winsock.h>
 #include "getopt/getopt.h"
+#include "strsep/strsep.h"
 #else
 #include <arpa/inet.h>
 #include <unistd.h>
