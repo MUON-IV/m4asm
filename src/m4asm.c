@@ -10,9 +10,9 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #endif
+#include "label.h"
 #include "m4asm.h"
 #include "insns.h"
-
 
 void usage(char** argv) {
     fprintf(stderr, "Usage: %s [-i file] [-o file]\n", argv[0]);
@@ -52,7 +52,9 @@ int main(int argc, char** argv) {
     }
     char *line = (char*)malloc(32768);
 
-    int insns = 0;
+    struct le_context lctx = le_init_context();
+
+    fseek(fp, 0, SEEK_SET);
     while (fgets(line, 32768, fp)) {
         if (ferror(fp)) {
             fclose(fp);
@@ -60,11 +62,38 @@ int main(int argc, char** argv) {
             exit(-errno);
         }
         line[strcspn(line, "\r\n")] = 0;
-        struct assembled_insn_t asi = parse_and_assemble_insn(line);
-        if (asi.length > 0) insns ++;
+        le_initial_count(line, &lctx);
+    }
+    le_allocate_labels(&lctx);
+
+    fseek(fp, 0, SEEK_SET);
+    int insns = 0;
+    uint32_t addr = 0;
+    while (fgets(line, 32768, fp)) {
+        if (ferror(fp)) {
+            fclose(fp);
+            perror("Reading file");
+            exit(-errno);
+        }
+        line[strcspn(line, "\r\n")] = 0;
+        if (memcmp(line, "$ORG ", 5) == 0 && strlen(line)>5) {
+            struct parsed_int_t pp = getintval(line + 5);
+            if (pp.code != 0) {
+                fprintf(stderr, "Error: Invalid origin specified: %s\n", line);
+                exit(EXIT_FAILURE);
+            }
+            addr = pp.value&0xFFFFFFFF;
+        } else {
+            if (strlen(line) > 2 && le_parse_label(line, addr, &lctx, 1)) {
+                struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
+                if (asi.length > 0) insns ++;
+                addr += asi.length*2;
+            }
+        }
     }
 
     fseek(fp, 0, SEEK_SET);
+    lctx.stage = 1;
 
     struct assembled_insn_t *assembled = (struct assembled_insn_t*)malloc(sizeof(struct assembled_insn_t) * insns);
     int c = 0;
@@ -75,10 +104,12 @@ int main(int argc, char** argv) {
             exit(-errno);
         }
         line[strcspn(line, "\r\n")] = 0;
-        struct assembled_insn_t asi = parse_and_assemble_insn(line);
-        if (asi.length > 0) {
-            assembled[c] = asi;
-            c++;
+        if (strlen(line) > 2 && !le_valid_label(line)) { 
+            struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
+            if (asi.length > 0) {
+                assembled[c] = asi;
+                c++;
+            }
         }
     }
 
@@ -104,6 +135,7 @@ int main(int argc, char** argv) {
     free(assembled);
     free(infile);
     free(outfile);
+    le_free_labels(&lctx);
 }
 
 void print_assembled_insn(struct assembled_insn_t in) {
@@ -113,7 +145,7 @@ void print_assembled_insn(struct assembled_insn_t in) {
     }
 } 
 
-struct assembled_insn_t parse_and_assemble_insn(char* data) {
+struct assembled_insn_t parse_and_assemble_insn(char* data, struct le_context *lctx) {
     struct assembled_insn_t ret;
     memset(&ret, 0, sizeof(ret));
 
@@ -133,7 +165,7 @@ struct assembled_insn_t parse_and_assemble_insn(char* data) {
     memset(pvs, 0, sizeof(struct parsed_param_t) * 16);
 
     for (int i=1;i<numflds;i++) {
-        struct parsed_param_t pp = parse_param(values[i]);
+        struct parsed_param_t pp = parse_param(values[i], lctx);
         if (pp.code != 0) {
             fprintf(stderr, "Error parsing parameter: %s\n", values[i]);
             exit(EXIT_FAILURE);
@@ -478,7 +510,7 @@ struct parsed_int_t getintval(char* f) {
     return ret;
 }
 
-struct parsed_param_t parse_param(char* p) {
+struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
     char* cpy = strdup(p);
     if (cpy[strlen(cpy)-1] == ',') cpy[strlen(cpy)-1] = 0;
     struct parsed_param_t ret;
@@ -526,15 +558,18 @@ struct parsed_param_t parse_param(char* p) {
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy);
         if (iv.code != 0 || iv.value > 0xFFFFFFFF) {
-            fprintf(stderr, "Error: Invalid parameter value (PTYPE_WORD_IMM): %s\n", p);
-            exit(EXIT_FAILURE);
-        }
-        if (iv.value > 0xFFFF) {
-            ret.value = iv.value&0xFFFFFFFF;
+            //fprintf(stderr, "Error: Invalid parameter value (PTYPE_WORD_IMM): %s\n", p);
+            //exit(EXIT_FAILURE);
+            ret.value = le_get_label_addr(cpy, lctx);
             ret.type = PTYPE_DWORD_IMM;
         } else {
-            ret.value = iv.value;
-            ret.type = PTYPE_WORD_IMM;
+            if (iv.value > 0xFFFF) {
+                ret.value = iv.value&0xFFFFFFFF;
+                ret.type = PTYPE_DWORD_IMM;
+            } else {
+                ret.value = iv.value;
+                ret.type = PTYPE_WORD_IMM;
+            }
         }
     }
 
