@@ -106,6 +106,9 @@
 #define OPC_MOV_RSA 0x4F
 #define OPC_IMOV_RSA 0x4E
 
+// SPECIAL ASSEMBLER-SPECIFIC
+#define OPC_DW 0x10FF
+
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 
@@ -130,7 +133,7 @@ struct parsed_int_t {
 
 struct insn_def_t {
     const char *mnemonic;
-    unsigned char opcode;
+    unsigned short opcode;
     int length;
     int cycles;
     const char *params; // R = register, W = word, D = dword, n = [near address], f = [far address]
@@ -218,6 +221,8 @@ static struct insn_def_t insns[] = {
 
     {"emov" , OPC_MOV_RSA       , 1, 4, "RR"},
     {"iemov", OPC_IMOV_RSA      , 1, 4, "RR"},
+
+    {"dw"   , OPC_DW            , 1, 1, "W"},
 
     {(char*)NULL, 0, 0, 0, (char*)NULL}, // terminator
 };

@@ -491,6 +491,12 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             ret.data[0] = htons(opcode) | htons((p0&0xF)<<12) | htons((p1&0xF)<<8);
             break;
 
+        // Special (assemblers-specific)
+        case OPC_DW: // p0: binary data
+            ret.length = 1;
+            ret.data[0] = l16(p0);
+            break;
+
         default:
             fprintf(stderr, "ERROR: Illegal instruction opcode=0x%04X\n",opcode);
             exit(EXIT_FAILURE);
@@ -521,21 +527,27 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy+1);
         if (iv.code != 0 || iv.value > 0xFFFFFFFF) {
-            fprintf(stderr, "Error: Invalid parameter value (PTYPE_FAR_PTR): %s\n", p);
-            exit(EXIT_FAILURE);
+            //fprintf(stderr, "Error: Invalid parameter value (PTYPE_FAR_PTR): %s\n", p);
+            //exit(EXIT_FAILURE);
+            ret.value = le_get_label_addr(cpy+1, lctx);
+            ret.type = PTYPE_FAR_PTR;
+        } else {
+            ret.value = iv.value&0xFFFFFFFF;
+            ret.type = PTYPE_FAR_PTR;
         }
-        ret.value = iv.value&0xFFFFFFFF;
-        ret.type = PTYPE_FAR_PTR;
     } else if (cpy[0] == '(' && p[strlen(cpy) - 1] == ')') { // NEAR pointer (0xF00D)
         cpy[strlen(cpy) - 1] = 0;
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy+1);
         if (iv.code != 0 || iv.value > 0xFFFF) {
-            fprintf(stderr, "Error: Invalid parameter value (PTYPE_NEAR_PTR): %s\n", p);
-            exit(EXIT_FAILURE);
+            //fprintf(stderr, "Error: Invalid parameter value (PTYPE_NEAR_PTR): %s\n", p);
+            //exit(EXIT_FAILURE);
+            ret.value = le_get_label_addr(cpy+1, lctx)&0xFFFF;
+            ret.type = PTYPE_NEAR_PTR;
+        } else {
+            ret.value = iv.value&0xFFFF;
+            ret.type = PTYPE_NEAR_PTR;
         }
-        ret.value = iv.value&0xFFFF;
-        ret.type = PTYPE_NEAR_PTR;
     } else if (cpy[0] == 'r') { // REGISTER r?
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy+1);
