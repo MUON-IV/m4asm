@@ -606,6 +606,10 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
         }
         ret.value = iv.value&0xFFFFFFFF;
         ret.type = PTYPE_DWORD_IMM;
+    } else if (cpy[0] == '\'' && cpy[strlen(cpy)-1] == '\'' && strlen(cpy) == 3) {
+        ret.value = (uint32_t)cpy[1]&0xFF;
+        ret.type = PTYPE_WORD_IMM;
+        ret.code = 0;
     } else {
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy);
