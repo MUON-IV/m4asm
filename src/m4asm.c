@@ -76,7 +76,7 @@ int main(int argc, char** argv) {
             exit(-errno);
         }
         line[strcspn(line, "\r\n")] = 0;
-        if (memcmp(line, "$ORG ", 5) == 0 && strlen(line)>5) {
+        if ((memcmp(line, "$ORG ", 5) == 0 || memcmp(line, "$org ", 5) == 0) && strlen(line)>5) {
             struct parsed_int_t pp = getintval(line + 5);
             if (pp.code != 0) {
                 fprintf(stderr, "Error: Invalid origin specified: %s\n", line);
@@ -104,7 +104,7 @@ int main(int argc, char** argv) {
             exit(-errno);
         }
         line[strcspn(line, "\r\n")] = 0;
-        if (strlen(line) > 2 && !le_valid_label(line)) { 
+        if (strlen(line) > 2 && !le_valid_label(line) && memcmp(line, "$org ",5)!=0 && memcmp(line, "$org ",5)!=0) { 
             struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
             if (asi.length > 0) {
                 assembled[c] = asi;
