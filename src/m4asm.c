@@ -9,6 +9,7 @@
 #else
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <getopt.h>
 #endif
 #include "label.h"
 #include "m4asm.h"
