@@ -23,4 +23,7 @@ struct parsed_param_t {
     uint32_t value;
 };
 
+#define OUTFMT_BINARY 0
+#define OUTFMT_LOGISIM 1
+
 #endif

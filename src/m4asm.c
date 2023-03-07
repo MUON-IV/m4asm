@@ -16,7 +16,7 @@
 #include "insns.h"
 
 void usage(char** argv) {
-    fprintf(stderr, "Usage: %s [-i file] [-o file]\n", argv[0]);
+    fprintf(stderr, "Usage: %s [-i file] [-o file] [-f binary/logisim]\n", argv[0]);
     exit(EXIT_FAILURE);
 }
 
@@ -27,14 +27,24 @@ int main(int argc, char** argv) {
     char *infile = NULL;
     char *outfile = NULL;
     int opt;
+    int outformat = OUTFMT_BINARY;
 
-    while ((opt = getopt(argc, argv, "i:o:")) != -1) {
+    while ((opt = getopt(argc, argv, "i:o:f:")) != -1) {
         switch (opt) {
         case 'i': 
             infile = strdup(optarg);
             break;
         case 'o': 
             outfile = strdup(optarg);
+            break;
+        case 'f':
+            if (strcmp(optarg,"logisim") == 0) {
+                outformat = OUTFMT_LOGISIM;
+            } else if (strcmp(optarg, "binary") == 0) {
+                outformat = OUTFMT_BINARY;
+            } else {
+                usage(argv);
+            }
             break;
         default:
             usage(argv);
@@ -122,13 +132,42 @@ int main(int argc, char** argv) {
         exit(-errno);
     }
 
-    for (int i=0;i<insns;i++) {
-        if (fwrite(assembled[i].data, 2, assembled[i].length, fp) != assembled[i].length) {
+    if (outformat == OUTFMT_BINARY) {
+        for (int i=0;i<insns;i++) {
+            if (fwrite(assembled[i].data, 2, assembled[i].length, fp) != assembled[i].length) {
+                perror("fwrite");
+                exit(-errno);
+            }
+            if (ferror(fp)) {
+                exit(-errno);
+            }
+        }
+    } else if (outformat == OUTFMT_LOGISIM) {
+        char* hdr = "v3.0 hex words addressed\n";
+        if (fwrite(hdr, 1, strlen(hdr), fp) != (strlen(hdr))) {
             perror("fwrite");
             exit(-errno);
         }
-        if (ferror(fp)) {
-            exit(-errno);
+
+        uint32_t a = 0;
+        for (int i=0;i<insns;i++) {
+            // 01234567: abcd dead f00d
+            char* outline = (char*)malloc(10 + (5 * assembled[i].length) + 2);
+            memset(outline, 0, 10 + (5 * assembled[i].length) + 2);
+            snprintf(outline, 10 + (5 * assembled[i].length) + 1, "%08X: ", a);
+            for (int j=0;j<assembled[i].length;j++) {
+                char buf[6];
+                snprintf(buf, 6, "%04x ",htons(assembled[i].data[j]));
+                memcpy(outline + 10 + (5*j), buf, 5);
+            }
+            outline[strlen(outline)-1] = '\n';
+            if (fwrite(outline, 1, strlen(outline), fp) != (strlen(outline))) {
+                perror("fwrite");
+                exit(-errno);
+            }
+
+            free(outline);
+            a += assembled[i].length;
         }
     }
 

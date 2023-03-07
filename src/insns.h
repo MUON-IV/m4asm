@@ -136,7 +136,7 @@ struct insn_def_t {
     unsigned short opcode;
     int length;
     int cycles;
-    const char *params; // R = register, W = word, D = dword, n = [near address], f = [far address]
+    const char *params; // R = register, W = word, D = dword, n = (near address), f = [far address]
 };
 
 static struct insn_def_t insns[] = {
