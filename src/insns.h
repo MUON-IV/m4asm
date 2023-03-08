@@ -105,6 +105,7 @@
 // Special T,T+1 MOVs
 #define OPC_MOV_RSA 0x4F
 #define OPC_IMOV_RSA 0x4E
+#define OPC_MOV_RSA_LOAD 0x50
 
 // SPECIAL ASSEMBLER-SPECIFIC
 #define OPC_DW 0x10FF
@@ -219,8 +220,9 @@ static struct insn_def_t insns[] = {
     {"brchi", OPC_BRCH_IV_FAR   , 3, 5, "DW"},
     {"brchi", OPC_BRCH_IV_NEAR  , 2, 5, "WW"},
 
-    {"emov" , OPC_MOV_RSA       , 1, 4, "RR"},
-    {"iemov", OPC_IMOV_RSA      , 1, 4, "RR"},
+    {"emovs" , OPC_MOV_RSA       , 1, 4, "RR"},
+    {"iemovs", OPC_IMOV_RSA      , 1, 4, "RR"},
+    {"emovl" , OPC_MOV_RSA_LOAD  , 1, 4, "RR"},
 
     {"dw"   , OPC_DW            , 1, 1, "W"},
 

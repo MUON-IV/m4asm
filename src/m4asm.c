@@ -531,6 +531,12 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             ret.data[0] = htons(opcode) | htons((p0&0xF)<<12) | htons((p1&0xF)<<8);
             break;
 
+        case OPC_MOV_RSA_LOAD: // emovl
+            ret.length = 1;
+            ret.data[0] = htons(opcode) | htons((p1&0xF)<<12) | htons((p0&0xF)<<8);
+            break;
+
+
         // Special (assemblers-specific)
         case OPC_DW: // p0: binary data
             ret.length = 1;
