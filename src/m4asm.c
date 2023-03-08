@@ -616,8 +616,13 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
         if (iv.code != 0 || iv.value > 0xFFFFFFFF) {
             //fprintf(stderr, "Error: Invalid parameter value (PTYPE_WORD_IMM): %s\n", p);
             //exit(EXIT_FAILURE);
-            ret.value = le_get_label_addr(cpy, lctx);
-            ret.type = PTYPE_DWORD_IMM;
+            if (cpy[0] == '@') {
+                ret.value = le_get_label_addr(cpy+1, lctx)&0xFFFF;
+                ret.type = PTYPE_WORD_IMM;
+            } else {
+                ret.value = le_get_label_addr(cpy, lctx);
+                ret.type = PTYPE_DWORD_IMM;
+            }
         } else {
             if (iv.value > 0xFFFF) {
                 ret.value = iv.value&0xFFFFFFFF;

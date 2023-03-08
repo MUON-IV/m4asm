@@ -76,7 +76,7 @@
 
 // CALL
 #define OPC_CALL_FAR 0x31
-#define OPC_CALL_NEAR 0xE0
+#define OPC_CALL_NEAR 0x38
 
 // RET
 #define OPC_RET 0x33
