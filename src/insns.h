@@ -106,6 +106,8 @@
 #define OPC_MOV_RSA 0x4F
 #define OPC_IMOV_RSA 0x4E
 #define OPC_MOV_RSA_LOAD 0x50
+#define OPC_MMOV_RSA 0x53
+#define OPC_MMOV_RSA_LOAD 0x52
 
 // SPECIAL ASSEMBLER-SPECIFIC
 #define OPC_DW 0x10FF
@@ -222,7 +224,9 @@ static struct insn_def_t insns[] = {
 
     {"emovs" , OPC_MOV_RSA       , 1, 4, "RR"},
     {"iemovs", OPC_IMOV_RSA      , 1, 4, "RR"},
+    {"memovs", OPC_MMOV_RSA      , 1, 4, "RR"},
     {"emovl" , OPC_MOV_RSA_LOAD  , 1, 4, "RR"},
+    {"memovl", OPC_MMOV_RSA_LOAD , 1, 4, "RR"},
 
     {"dw"   , OPC_DW            , 1, 1, "W"},
 

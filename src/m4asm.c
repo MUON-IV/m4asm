@@ -525,12 +525,14 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             break;
 
         // EMOV (IO and otherwise), see docs. RSA=Register specified address. p0 = T, p1 = R
+        case OPC_MMOV_RSA:
         case OPC_IMOV_RSA:
         case OPC_MOV_RSA:
             ret.length = 1;
             ret.data[0] = htons(opcode) | htons((p0&0xF)<<12) | htons((p1&0xF)<<8);
             break;
 
+        case OPC_MMOV_RSA_LOAD:
         case OPC_MOV_RSA_LOAD: // emovl
             ret.length = 1;
             ret.data[0] = htons(opcode) | htons((p1&0xF)<<12) | htons((p0&0xF)<<8);
