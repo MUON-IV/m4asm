@@ -95,7 +95,7 @@ int main(int argc, char** argv) {
             }
             addr = pp.value&0xFFFFFFFF;
         } else {
-            if (strlen(line) > 2 && le_parse_label(line, addr, &lctx, 1)) {
+            if (strlen(line) > 2 && le_parse_label(line, addr, &lctx, 1) && line[0] != ';') {
                 struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
                 if (asi.length > 0) insns ++;
                 addr += asi.length*2;
@@ -115,7 +115,7 @@ int main(int argc, char** argv) {
             exit(-errno);
         }
         line[strcspn(line, "\r\n")] = 0;
-        if (strlen(line) > 2 && !le_valid_label(line) && memcmp(line, "$org ",5)!=0 && memcmp(line, "$org ",5)!=0) { 
+        if (strlen(line) > 2 && !le_valid_label(line) && memcmp(line, "$org ",5)!=0 && memcmp(line, "$org ",5)!=0 && line[0] != ';') { 
             struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
             if (asi.length > 0) {
                 assembled[c] = asi;
