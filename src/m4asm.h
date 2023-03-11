@@ -16,6 +16,7 @@ struct assembled_insn_t parse_and_assemble_insn(char* data, struct le_context *l
 void print_assembled_insn(struct assembled_insn_t in);
 struct parsed_int_t getintval(char* f);
 struct parsed_param_t parse_param(char* p, struct le_context *lctx);
+char* collapse_spaces(char* str);
 
 struct parsed_param_t {
     int code; // 0 = no error

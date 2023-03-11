@@ -61,31 +61,34 @@ int main(int argc, char** argv) {
         perror("fopen()");
         exit(-errno);
     }
-    char *line = (char*)malloc(32768);
+    char *line_ = (char*)malloc(32768);
 
     struct le_context lctx = le_init_context();
 
     fseek(fp, 0, SEEK_SET);
-    while (fgets(line, 32768, fp)) {
+    while (fgets(line_, 32768, fp)) {
         if (ferror(fp)) {
             fclose(fp);
             perror("Reading file");
             exit(-errno);
         }
+        char* line = collapse_spaces(line_);
         line[strcspn(line, "\r\n")] = 0;
         le_initial_count(line, &lctx);
+        free(line);
     }
     le_allocate_labels(&lctx);
 
     fseek(fp, 0, SEEK_SET);
     int insns = 0;
     uint32_t addr = 0;
-    while (fgets(line, 32768, fp)) {
+    while (fgets(line_, 32768, fp)) {
         if (ferror(fp)) {
             fclose(fp);
             perror("Reading file");
             exit(-errno);
         }
+        char* line = collapse_spaces(line_);
         line[strcspn(line, "\r\n")] = 0;
         if ((memcmp(line, "$ORG ", 5) == 0 || memcmp(line, "$org ", 5) == 0) && strlen(line)>5) {
             struct parsed_int_t pp = getintval(line + 5);
@@ -101,6 +104,7 @@ int main(int argc, char** argv) {
                 addr += asi.length*2;
             }
         }
+        free(line);
     }
 
     fseek(fp, 0, SEEK_SET);
@@ -108,12 +112,13 @@ int main(int argc, char** argv) {
 
     struct assembled_insn_t *assembled = (struct assembled_insn_t*)malloc(sizeof(struct assembled_insn_t) * insns);
     int c = 0;
-    while (fgets(line, 32768, fp)) {
+    while (fgets(line_, 32768, fp)) {
         if (ferror(fp)) {
             fclose(fp);
             perror("Reading file");
             exit(-errno);
         }
+        char* line = collapse_spaces(line_);
         line[strcspn(line, "\r\n")] = 0;
         if (strlen(line) > 2 && !le_valid_label(line) && memcmp(line, "$org ",5)!=0 && memcmp(line, "$org ",5)!=0 && line[0] != ';') { 
             struct assembled_insn_t asi = parse_and_assemble_insn(line, &lctx);
@@ -122,6 +127,7 @@ int main(int argc, char** argv) {
                 c++;
             }
         }
+        free(line);
     }
 
     fclose(fp);
@@ -644,4 +650,34 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
 
     free(cpy);
     return ret;
+}
+
+char* collapse_spaces_part(char* str){
+    if (strlen(str) < 2) return strdup(str);
+    char prev = str[0];
+    for (int i=1;i<strlen(str);i++) {
+        char cur = str[i];
+        if (prev == cur && cur == ' ') {
+            char* ns = (char*)malloc(strlen(str));
+            memset(ns, 0, strlen(str));
+            memcpy(ns, str, i);
+            strcpy(ns+i, str+i+1);
+            return ns;
+        } 
+        prev = cur;
+    }
+    return str;
+}
+
+char* collapse_spaces(char* str){
+    char* dup = strdup(str);
+    char* r = NULL;
+    int k = 0;
+    while (strcmp(r = collapse_spaces_part(dup), dup) != 0) {
+        free(dup);
+        dup = strdup(r);
+        free(r);
+    }
+    //free(dup);
+    return dup;
 }
