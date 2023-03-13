@@ -766,7 +766,7 @@ struct assembled_insn_t handle_special_cases(char* data) {
 
         ret.length = strlen(val);
         for (int i=0;i<strlen(val);i++) {
-            ret.data[i] = (uint16_t)val[i];
+            ret.data[i] = htons((uint16_t)val[i]);
         }
 
         pcre_free_substring(val);
