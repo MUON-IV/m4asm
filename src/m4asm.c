@@ -211,10 +211,8 @@ struct assembled_insn_t parse_and_assemble_insn(char* data, struct le_context *l
     memset(ptypes,0,17);
     memset(pvs, 0, sizeof(struct parsed_param_t) * 16);
 
-    pcre *pp_regex;
-
     for (int i=1;i<numflds;i++) {
-        struct parsed_param_t pp = parse_param(values[i], lctx, &pp_regex);
+        struct parsed_param_t pp = parse_param(values[i], lctx);
         if (pp.code != 0) {
             fprintf(stderr, "Error parsing parameter: %s\n", values[i]);
             exit(EXIT_FAILURE);
@@ -577,17 +575,17 @@ struct parsed_int_t getintval(char* f) {
     return ret;
 }
 
-struct parsed_param_t parse_param(char* p, struct le_context *lctx, pcre **pp_regex) {
-    if (*pp_regex == NULL) {
-        const char *error;
-        int erroffset;
+struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
+    pcre *pp_regex;
 
-        *pp_regex = pcre_compile(REGEX_PTYPE_REGPAIR, 0, &error, &erroffset, NULL);
-        //int rc = pcre_exec(re, NULL, subject, strlen(subject), 0, 0, ovector, 30);
-        if (*pp_regex == NULL) {
-            printf("Error compiling regex: [%s] - %s\n",REGEX_PTYPE_REGPAIR,error);
-            exit(EXIT_FAILURE);
-        }
+    const char *error;
+    int erroffset;
+
+    pp_regex = pcre_compile(REGEX_PTYPE_REGPAIR, 0, &error, &erroffset, NULL);
+    //int rc = pcre_exec(re, NULL, subject, strlen(subject), 0, 0, ovector, 30);
+    if (pp_regex == NULL) {
+        printf("Error compiling regex: [%s] - %s\n",REGEX_PTYPE_REGPAIR,error);
+        exit(EXIT_FAILURE);
     }
 
     char* cpy = strdup(p);
@@ -603,7 +601,7 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx, pcre **pp_re
             //fprintf(stderr, "Error: Invalid parameter value (PTYPE_FAR_PTR): %s\n", p);
             //exit(EXIT_FAILURE);
             int ovector[30];
-            int rc = pcre_exec(*pp_regex, NULL, p, strlen(p), 0, 0, ovector, 30);
+            int rc = pcre_exec(pp_regex, NULL, p, strlen(p), 0, 0, ovector, 30);
             if (rc == 3) {
                 const char *rX, *rY;
                 if ((rc= pcre_get_substring(p, ovector, 3, 1, &rX))<0) {
