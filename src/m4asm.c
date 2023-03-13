@@ -371,6 +371,7 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
 
 
         // R+R logic
+        case OPC_CMP_RR:
         case OPC_AND_RR:
         case OPC_OR_RR:
         case OPC_XOR_RR:

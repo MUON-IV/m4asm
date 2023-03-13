@@ -61,6 +61,7 @@
 #define OPC_NOR_RI 0x22
 #define OPC_NAND_RR 0x23
 #define OPC_NAND_RI 0x24
+#define OPC_CMP_RR 0x57
 
 // PUSH
 #define OPC_PUSHB_FAR 0x25
@@ -179,8 +180,8 @@ static struct insn_def_t insns[] = {
     {"not"  , OPC_NOT_R         , 1, 1, "R"},
     {"inc"  , OPC_INC_R         , 1, 1, "R"},
     {"dec"  , OPC_DEC_R         , 1, 1, "R"},
-    {"dec2" , OPC_DEC2_R         , 1, 1, "R"},
-    {"inc2" , OPC_INC2_R         , 1, 1, "R"},
+    {"dec2" , OPC_DEC2_R        , 1, 1, "R"},
+    {"inc2" , OPC_INC2_R        , 1, 1, "R"},
 
     {"and"  , OPC_AND_RR        , 1, 1, "RR"},
     {"or"   , OPC_OR_RR         , 1, 1, "RR"},
@@ -188,6 +189,7 @@ static struct insn_def_t insns[] = {
     {"xor"  , OPC_XOR_RR        , 1, 1, "RR"},
     {"nand" , OPC_NAND_RR       , 1, 1, "RR"},
     {"xnor" , OPC_XNOR_RR       , 1, 1, "RR"},
+    {"cmp"  , OPC_CMP_RR        , 1, 1, "RR"},
 
     {"and"  , OPC_AND_RI        , 2, 2, "RW"},
     {"or"   , OPC_OR_RI         , 2, 2, "RW"},
