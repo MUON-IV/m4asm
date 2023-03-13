@@ -6,10 +6,9 @@ project(
   LANGUAGES C)
 
 if (MSVC)
-find_package(pcre REQUIRED)
+find_package(unofficial-pcre CONFIG REQUIRED)
 add_executable(m4asm src/m4asm.c src/label.c src/getopt/getopt.c src/strsep/strsep.c)
-message("TEST: ${pcre_LIBRARIES}")
-target_link_libraries(m4asm ws2_32 wsock32 ${pcre_LIBRARIES})
+target_link_libraries(m4asm ws2_32 wsock32 unofficial::pcre::pcre unofficial::pcre::pcre16 unofficial::pcre::pcre32 unofficial::pcre::pcrecpp)
 else()
 add_executable(m4asm src/m4asm.c src/label.c)
 target_link_libraries(m4asm pcre)
