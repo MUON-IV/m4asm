@@ -16,6 +16,8 @@
 #include "m4asm.h"
 #include "insns.h"
 
+pcre *pp_regex;
+
 void usage(char** argv) {
     fprintf(stderr, "Usage: %s [-i file] [-o file] [-f binary/logisim]\n", argv[0]);
     exit(EXIT_FAILURE);
@@ -24,6 +26,8 @@ void usage(char** argv) {
 int main(int argc, char** argv) {
     printf("m4asm (C) Charlie Camilleri 2023\n");
     printf("Version 0.9\n\n");
+
+    pp_regex = NULL;
 
     char *infile = NULL;
     char *outfile = NULL;
@@ -575,7 +579,6 @@ struct parsed_int_t getintval(char* f) {
     return ret;
 }
 
-pcre *pp_regex = NULL;
 struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
     if (pp_regex == NULL) {
         const char *error;
