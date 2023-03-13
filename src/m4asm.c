@@ -520,13 +520,13 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         // BRCH
         case OPC_BRCH_FLG_FAR: // p0: addr, p1: flags to test
             ret.length = 3;
-            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xF)<<12);
+            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xFF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_BRCH_FLG_NEAR: // p0: addr, p1: flags to test
             ret.length = 2;
-            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xF)<<12);
+            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xFF)<<8);
             ret.data[1] = l16(p0);
             break;
         case OPC_BRCH_IV_FAR: // p0: addr, p1: IV to test
