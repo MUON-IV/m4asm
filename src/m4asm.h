@@ -27,4 +27,6 @@ struct parsed_param_t {
 #define OUTFMT_BINARY 0
 #define OUTFMT_LOGISIM 1
 
+#define REGEX_PTYPE_REGPAIR "^\\[(r1[0-5]|r[0-9])\\:(r1[0-5]|r[0-9])\\]$"
+
 #endif

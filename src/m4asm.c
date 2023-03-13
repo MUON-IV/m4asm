@@ -10,6 +10,7 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include <getopt.h>
+#include <pcre.h>
 #endif
 #include "label.h"
 #include "m4asm.h"
@@ -574,7 +575,20 @@ struct parsed_int_t getintval(char* f) {
     return ret;
 }
 
+pcre *pp_regex = NULL;
 struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
+    if (pp_regex == NULL) {
+        const char *error;
+        int erroffset;
+
+        pp_regex = pcre_compile(REGEX_PTYPE_REGPAIR, 0, &error, &erroffset, NULL);
+        //int rc = pcre_exec(re, NULL, subject, strlen(subject), 0, 0, ovector, 30);
+        if (pp_regex == NULL) {
+            printf("Error compiling regex: [%s] - %s\n",REGEX_PTYPE_REGPAIR,error);
+            exit(EXIT_FAILURE);
+        }
+    }
+
     char* cpy = strdup(p);
     if (cpy[strlen(cpy)-1] == ',') cpy[strlen(cpy)-1] = 0;
     struct parsed_param_t ret;
@@ -587,8 +601,38 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
         if (iv.code != 0 || iv.value > 0xFFFFFFFF) {
             //fprintf(stderr, "Error: Invalid parameter value (PTYPE_FAR_PTR): %s\n", p);
             //exit(EXIT_FAILURE);
-            ret.value = le_get_label_addr(cpy+1, lctx);
-            ret.type = PTYPE_FAR_PTR;
+            int ovector[30];
+            int rc = pcre_exec(pp_regex, NULL, p, strlen(p), 0, 0, ovector, 30);
+            if (rc == 3) {
+                const char *rX, *rY;
+                if ((rc= pcre_get_substring(p, ovector, 3, 1, &rX))<0) {
+                    printf("Error getting regex substring 1: %d\n", rc);
+                    exit(EXIT_FAILURE);
+                }
+                if ((rc= pcre_get_substring(p, ovector, 3, 2, &rY))<0) {
+                    printf("Error getting regex substring 2: %d\n", rc);
+                    exit(EXIT_FAILURE);
+                }
+
+                int X = atoi(rX+1);
+                int Y = atoi(rY+1);
+                pcre_free_substring(rX);
+                pcre_free_substring(rY);
+
+                if (Y != (X+1) || Y>15 || X >15 || Y < 0 || X < 0) {
+                    printf("Error: Invalid register pairing %s\n", p);
+                    exit(EXIT_FAILURE);
+                }
+
+                ret.value = X;
+                ret.type = PTYPE_REGPAIR_PTR;
+            } else {
+                if (rc<-1) {
+                    printf("Warning: REGEX_PTYPE_REGPAIR had unknown error while testing parameter %s. [rc=%d]\n",cpy,rc);
+                }
+                ret.value = le_get_label_addr(cpy+1, lctx);
+                ret.type = PTYPE_FAR_PTR;
+            }
         } else {
             ret.value = iv.value&0xFFFFFFFF;
             ret.type = PTYPE_FAR_PTR;

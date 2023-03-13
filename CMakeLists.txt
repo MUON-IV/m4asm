@@ -7,7 +7,8 @@ project(
 
 if (MSVC)
 add_executable(m4asm src/m4asm.c src/label.c src/getopt/getopt.c src/strsep/strsep.c)
-target_link_libraries(m4asm ws2_32 wsock32)
+target_link_libraries(m4asm ws2_32 wsock32 pcre)
 else()
 add_executable(m4asm src/m4asm.c src/label.c)
+target_link_libraries(m4asm pcre)
 endif()

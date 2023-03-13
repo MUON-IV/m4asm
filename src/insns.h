@@ -134,6 +134,7 @@ struct parsed_int_t {
 #define PTYPE_DWORD_IMM 'D'// d0xDEADBEEF
 #define PTYPE_NEAR_PTR 'n' // (0xF00D)
 #define PTYPE_FAR_PTR 'f'  // [0xDEADBEEF]
+#define PTYPE_REGPAIR_PTR 'p' // [r1:r2]
 
 #include <stddef.h>
 
@@ -228,11 +229,11 @@ static struct insn_def_t insns[] = {
     {"brchi", OPC_BRCH_IV_FAR   , 3, 5, "DW"},
     {"brchi", OPC_BRCH_IV_NEAR  , 2, 5, "WW"},
 
-    {"emovs" , OPC_MOV_RSA       , 1, 4, "RR"},
-    {"iemovs", OPC_IMOV_RSA      , 1, 4, "RR"},
-    {"memovs", OPC_MMOV_RSA      , 1, 4, "RR"},
-    {"emovl" , OPC_MOV_RSA_LOAD  , 1, 4, "RR"},
-    {"memovl", OPC_MMOV_RSA_LOAD , 1, 4, "RR"},
+    {"mov"  , OPC_MOV_RSA       , 1, 4, "pR"},
+    {"imov" , OPC_IMOV_RSA      , 1, 4, "pR"},
+    {"mmov" , OPC_MMOV_RSA      , 1, 4, "pR"},
+    {"mov"  , OPC_MOV_RSA_LOAD  , 1, 4, "Rp"},
+    {"mmov" , OPC_MMOV_RSA_LOAD , 1, 4, "Rp"},
 
     {"dw"   , OPC_DW            , 1, 1, "W"},
 
