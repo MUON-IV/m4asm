@@ -196,56 +196,62 @@ struct assembled_insn_t parse_and_assemble_insn(char* data, struct le_context *l
     struct assembled_insn_t ret;
     memset(&ret, 0, sizeof(ret));
 
-    char* token, *mustfree, *dup;
-    mustfree = dup = strdup(data);
-    int numflds = 0;
-    char* values[16];
-    while ((token = strsep(&dup, " ")) && numflds < 16) {
-        values[numflds] = (char*)malloc(strlen(token) +1);
-        strcpy(values[numflds], token);
-        numflds++;
-    }
+    if ((ret = handle_special_cases(data)).length > 0) {
+        return ret;
+    } else {
 
-    char ptypes[17];
-    struct parsed_param_t pvs[16];
-    memset(ptypes,0,17);
-    memset(pvs, 0, sizeof(struct parsed_param_t) * 16);
+        char* token, *mustfree, *dup;
+        mustfree = dup = strdup(data);
+        int numflds = 0;
+        char* values[16];
+        while ((token = strsep(&dup, " ")) && numflds < 16) {
+            values[numflds] = (char*)malloc(strlen(token) +1);
+            strcpy(values[numflds], token);
+            numflds++;
+        }
 
-    for (int i=1;i<numflds;i++) {
-        struct parsed_param_t pp = parse_param(values[i], lctx);
-        if (pp.code != 0) {
-            fprintf(stderr, "Error parsing parameter: %s\n", values[i]);
+        char ptypes[17];
+        struct parsed_param_t pvs[16];
+        memset(ptypes,0,17);
+        memset(pvs, 0, sizeof(struct parsed_param_t) * 16);
+
+        for (int i=1;i<numflds;i++) {
+            struct parsed_param_t pp = parse_param(values[i], lctx);
+            if (pp.code != 0) {
+                fprintf(stderr, "Error parsing parameter: %s\n", values[i]);
+                exit(EXIT_FAILURE);
+            }
+            ptypes[i-1] = pp.type;
+            pvs[i-1] = pp;
+        }
+
+        STRTOLOWER(values[0]);
+    
+        int c = 0;
+        struct insn_def_t cd, best;
+        best.cycles = 999;
+        while ((cd = insns[c]).mnemonic != NULL) {
+            c++;
+            if (strcmp(values[0], cd.mnemonic)!=0) continue;
+            if (strcmp(ptypes, cd.params)) continue;
+
+            if (cd.cycles < best.cycles) best = cd;
+        }
+
+        if (best.cycles == 999) {
+            fprintf(stderr, "Error: Cannot find instruction with mnemonic %s and ptypes [%s]\n", values[0], ptypes);
             exit(EXIT_FAILURE);
         }
-        ptypes[i-1] = pp.type;
-        pvs[i-1] = pp;
+
+        int p0 = pvs[0].value;
+        int p1 = pvs[1].value;
+        int p2 = pvs[2].value;
+        int p3 = pvs[3].value;
+
+        for (int i=0;i<numflds;i++) free(values[i]);
+        free(mustfree);
+        return assemble_insn(best.opcode, p0, p1, p2, p3);
     }
-
-    STRTOLOWER(values[0]);
-    int c = 0;
-    struct insn_def_t cd, best;
-    best.cycles = 999;
-    while ((cd = insns[c]).mnemonic != NULL) {
-        c++;
-        if (strcmp(values[0], cd.mnemonic)!=0) continue;
-        if (strcmp(ptypes, cd.params)) continue;
-
-        if (cd.cycles < best.cycles) best = cd;
-    }
-
-    if (best.cycles == 999) {
-        fprintf(stderr, "Error: Cannot find instruction with mnemonic %s and ptypes [%s]\n", values[0], ptypes);
-        exit(EXIT_FAILURE);
-    }
-
-    int p0 = pvs[0].value;
-    int p1 = pvs[1].value;
-    int p2 = pvs[2].value;
-    int p3 = pvs[3].value;
-
-    for (int i=0;i<numflds;i++) free(values[i]);
-    free(mustfree);
-    return assemble_insn(best.opcode, p0, p1, p2, p3);
 }
 
 struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3) {
@@ -368,7 +374,6 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             ret.length = 1;
             ret.data[0] = htons(opcode) | htons((p0&0xF)<<8);
             break;
-
 
         // R+R logic
         case OPC_CMP_RR:
@@ -728,4 +733,46 @@ char* collapse_spaces(char* str){
     }
     //free(dup);
     return dup;
+}
+
+struct assembled_insn_t handle_special_cases(char* data) {
+    struct assembled_insn_t ret;
+    ret.length = 0;
+
+    pcre *re;
+
+    const char *error;
+    int erroffset;
+
+    re = pcre_compile(REGEX_DS, 0, &error, &erroffset, NULL);
+    if (re == NULL) {
+        printf("Error compiling regex: [%s] - %s\n",REGEX_DS,error);
+        exit(EXIT_FAILURE);
+    }
+
+    int ovector[30];
+    int rc = pcre_exec(re, NULL, data, strlen(data), 0, 0, ovector, 30);
+    if (rc == 3) {
+        const char *val;
+        if ((rc= pcre_get_substring(data, ovector, 3, 1, &val))<0) {
+            printf("Error getting regex substring 1: %d\n", rc);
+            exit(EXIT_FAILURE);
+        }
+
+        if (strlen(val) > 64) {
+            printf("Error: string value too long! [value=%s]\n",val);
+            exit(EXIT_FAILURE);
+        }
+
+        ret.length = strlen(val);
+        for (int i=0;i<strlen(val);i++) {
+            ret.data[i] = (uint16_t)val[i];
+        }
+
+        pcre_free_substring(val);
+
+        return ret;
+    } else {
+        return ret;
+    }
 }

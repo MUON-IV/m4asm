@@ -115,12 +115,13 @@
 
 // SPECIAL ASSEMBLER-SPECIFIC
 #define OPC_DW 0x10FF
+#define OPC_DS 0x10FE
 
 typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 
 struct assembled_insn_t {
-    uint16_t data[16];
+    uint16_t data[64];
     int length;
 };
 
@@ -136,6 +137,7 @@ struct parsed_int_t {
 #define PTYPE_NEAR_PTR 'n' // (0xF00D)
 #define PTYPE_FAR_PTR 'f'  // [0xDEADBEEF]
 #define PTYPE_REGPAIR_PTR 'p' // [r1:r2]
+#define PTYPE_CSTRING 's' // "abcd"
 
 #include <stddef.h>
 
@@ -238,6 +240,7 @@ static struct insn_def_t insns[] = {
     {"mmov" , OPC_MMOV_RSA_LOAD , 1, 4, "Rp"},
 
     {"dw"   , OPC_DW            , 1, 1, "W"},
+    {"ds"   , OPC_DS            , 1, 1, "s"},
 
     {(char*)NULL, 0, 0, 0, (char*)NULL}, // terminator
 };

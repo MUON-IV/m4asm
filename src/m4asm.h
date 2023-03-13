@@ -18,6 +18,7 @@ void print_assembled_insn(struct assembled_insn_t in);
 struct parsed_int_t getintval(char* f);
 struct parsed_param_t parse_param(char* p, struct le_context *lctx);
 char* collapse_spaces(char* str);
+struct assembled_insn_t handle_special_cases(char* data);
 
 struct parsed_param_t {
     int code; // 0 = no error
@@ -29,5 +30,6 @@ struct parsed_param_t {
 #define OUTFMT_LOGISIM 1
 
 #define REGEX_PTYPE_REGPAIR "^\\[(r1[0-5]|r[0-9])\\:(r1[0-5]|r[0-9])\\]"
+#define REGEX_DS "^ds\\s{1,}\\\"([a-zA-Z0-9!£$%^&*() ]{1,64})(\\\"|$)"
 
 #endif
