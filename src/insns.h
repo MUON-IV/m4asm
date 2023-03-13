@@ -44,6 +44,9 @@
 // NOT, INC
 #define OPC_NOT_R 0x18
 #define OPC_INC_R 0x30
+#define OPC_DEC_R 0x55
+#define OPC_DEC2_R 0x56
+#define OPC_INC2_R 0x54
 
 // 2-operand logic.
 #define OPC_AND_RR 0x19
@@ -174,6 +177,9 @@ static struct insn_def_t insns[] = {
 
     {"not"  , OPC_NOT_R         , 1, 1, "R"},
     {"inc"  , OPC_INC_R         , 1, 1, "R"},
+    {"dec"  , OPC_DEC_R         , 1, 1, "R"},
+    {"dec2" , OPC_DEC2_R         , 1, 1, "R"},
+    {"inc2" , OPC_INC2_R         , 1, 1, "R"},
 
     {"and"  , OPC_AND_RR        , 1, 1, "RR"},
     {"or"   , OPC_OR_RR         , 1, 1, "RR"},

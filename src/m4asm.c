@@ -361,9 +361,13 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         // 1-operand logic
         case OPC_NOT_R: // p0: register to invert
         case OPC_INC_R:
+        case OPC_DEC_R:
+        case OPC_DEC2_R:
+        case OPC_INC2_R:
             ret.length = 1;
             ret.data[0] = htons(opcode) | htons((p0&0xF)<<8);
             break;
+
 
         // R+R logic
         case OPC_AND_RR:
