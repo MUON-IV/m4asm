@@ -3,13 +3,9 @@
 #include <string.h>
 #include <errno.h>
 #include <pcre.h>
-#if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
-#include <winsock.h>
-#else
-#include <arpa/inet.h>
-#endif
-#include "getopt/getopt.h"
-#include "strsep/strsep.h"
+#include "lib/endianness/endianness.h"
+#include "lib/getopt/getopt.h"
+#include "lib/strsep/strsep.h"
 #include "label.h"
 #include "m4asm.h"
 #include "insns.h"
