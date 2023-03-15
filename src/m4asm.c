@@ -158,7 +158,7 @@ int main(int argc, char** argv) {
             snprintf(outline, 10 + (5 * assembled[i].length) + 1, "%08X: ", a);
             for (int j=0;j<assembled[i].length;j++) {
                 char buf[6];
-                snprintf(buf, 6, "%04x ",htons(assembled[i].data[j]));
+                snprintf(buf, 6, "%04x ",hton16(assembled[i].data[j]));
                 memcpy(outline + 10 + (5*j), buf, 5);
             }
             outline[strlen(outline)-1] = '\n';
@@ -254,100 +254,100 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
     switch (opcode) {
         case OPC_NOP: // NO PARAMS
             ret.length = 1;
-            ret.data[0] = htons(OPC_NOP);
+            ret.data[0] = hton16(OPC_NOP);
             break;
 
         // Jumps
         case OPC_JMP_FAR: // p0: full address
             ret.length = 3;
-            ret.data[0] = htons(OPC_JMP_FAR);
+            ret.data[0] = hton16(OPC_JMP_FAR);
             ret.data[2] = l16(p0);
             ret.data[1] = u16(p0);
             break;
         case OPC_JMP_NEAR: // p0: near address
             ret.length = 2;
-            ret.data[0] = htons(OPC_JMP_NEAR);
+            ret.data[0] = hton16(OPC_JMP_NEAR);
             ret.data[1] = l16(p0);
             break;
 
         // MOVs
         case OPC_MOV_I2R_NEAR: // p0: register to move value to, p1: near address to load from
             ret.length = 2;
-            ret.data[0] = htons(OPC_MOV_I2R_NEAR) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_I2R_NEAR) | hton16((p0&0xF)<<8);
             ret.data[1] = l16(p1);
             break;
         case OPC_MOV_I2R_FAR: // p0: register to move value to, p1: far address to load 
             ret.length = 3;
-            ret.data[0] = htons(OPC_MOV_I2R_FAR) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_I2R_FAR) | hton16((p0&0xF)<<8);
             ret.data[1] = u16(p1);
             ret.data[2] = l16(p1);
             break;
         case OPC_MOV_R2M_FAR: // p0: far dest address, p1: src register
             ret.length = 3;
-            ret.data[0] = htons(OPC_MOV_R2M_FAR) | htons((p1&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_R2M_FAR) | hton16((p1&0xF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_MOV_R2M_NEAR: // p0: near dest address, p1: src register
             ret.length = 2;
-            ret.data[0] = htons(OPC_MOV_R2M_NEAR) | htons((p1&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_R2M_NEAR) | hton16((p1&0xF)<<8);
             ret.data[1] = l16(p0);
             break;
         case OPC_MOV_R2R: // p0: dest reg, p1: src reg
             ret.length = 1;
-            ret.data[0] = htons(OPC_MOV_R2R) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(OPC_MOV_R2R) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
         case OPC_MOV_R2A: // p0: src reg
             ret.length = 1;
-            ret.data[0] = htons(OPC_MOV_R2A) | htons((p0&0xF)<<12);
+            ret.data[0] = hton16(OPC_MOV_R2A) | hton16((p0&0xF)<<12);
             break;
         case OPC_MOV_V2R: // p0: dest reg, p1: 16-bit value
             ret.length = 2;
-            ret.data[0] = htons(OPC_MOV_V2R) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_V2R) | hton16((p0&0xF)<<8);
             ret.data[1] = l16(p1);
             break;
         case OPC_MOV_V2A: // p0: 16-bit value
             ret.length = 2;
-            ret.data[0] = htons(OPC_MOV_V2A);
+            ret.data[0] = hton16(OPC_MOV_V2A);
             ret.data[1] = l16(p0);
             break;
         case OPC_MOV_D2R: // p0: dest register
             ret.length = 1;
-            ret.data[0] = htons(OPC_MOV_D2R) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_D2R) | hton16((p0&0xF)<<8);
             break;
         case OPC_MOV_R2D: // p0: src register
             ret.length = 1;
-            ret.data[0] = htons(OPC_MOV_R2D) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MOV_R2D) | hton16((p0&0xF)<<8);
             break;
 
         // ADD
         case OPC_ADD_RR: // p0: register, p1: r with number to add to p0
             ret.length = 1;
-            ret.data[0] = htons(OPC_ADD_RR) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(OPC_ADD_RR) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
         case OPC_ADD_RI: // p0: register, p1: imm value
             ret.length = 2;
-            ret.data[0] = htons(OPC_ADD_RI) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_ADD_RI) | hton16((p0&0xF)<<8);
             ret.data[1] = l16(p1);
             break;
         case OPC_ADC_RR: // p0: register, p1: r with number to add to p0 with carry
             ret.length = 1;
-            ret.data[0] = htons(OPC_ADC_RR) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(OPC_ADC_RR) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
 
         // SUB
         case OPC_SUB_RR: // p0: register, p1: r with number to sub from p0
             ret.length = 1;
-            ret.data[0] = htons(OPC_SUB_RR) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(OPC_SUB_RR) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
         case OPC_SUB_RI: // p0: register, p1: imm value
             ret.length = 2;
-            ret.data[0] = htons(OPC_SUB_RI) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_SUB_RI) | hton16((p0&0xF)<<8);
             ret.data[1] = l16(p1);
             break;
         case OPC_SUC_RR: // p0: register, p1: r with number to sub from p0 with carry/borrow
             ret.length = 1;
-            ret.data[0] = htons(OPC_SUC_RR) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(OPC_SUC_RR) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
 
         // Rotates
@@ -356,7 +356,7 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         case OPC_ROL_RI:
         case OPC_ROR_RI: // p0: affected register, p1: number of shifts or rotates
             ret.length = 1;
-            ret.data[0] = htons(opcode) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(opcode) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
 
         // 1-operand logic
@@ -366,7 +366,7 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         case OPC_DEC2_R:
         case OPC_INC2_R:
             ret.length = 1;
-            ret.data[0] = htons(opcode) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(opcode) | hton16((p0&0xF)<<8);
             break;
 
         // R+R logic
@@ -378,7 +378,7 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         case OPC_NOR_RR:
         case OPC_NAND_RR: // p0: affected register, p1: second operand (reg)
             ret.length = 1;
-            ret.data[0] = htons(opcode) | htons((p0&0xF)<<8) | htons((p1&0xF)<<12);
+            ret.data[0] = hton16(opcode) | hton16((p0&0xF)<<8) | hton16((p1&0xF)<<12);
             break;
 
         // R+I logic
@@ -389,37 +389,37 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         case OPC_NOR_RI:
         case OPC_NAND_RI: // p0: affected register, p1: second operand (imm)
             ret.length = 2;
-            ret.data[0] = htons(opcode) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(opcode) | hton16((p0&0xF)<<8);
             ret.data[1] = l16(p1);
             break;
 
         // PUSH
         case OPC_PUSHB_FAR: // p0: address to fetch byte from
             ret.length = 3;
-            ret.data[0] = htons(OPC_PUSHB_FAR);
+            ret.data[0] = hton16(OPC_PUSHB_FAR);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_PUSHW_FAR: // p0: address to fetch word from
             ret.length = 3;
-            ret.data[0] = htons(OPC_PUSHW_FAR);
+            ret.data[0] = hton16(OPC_PUSHW_FAR);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_PUSHW_NEAR: // p0: near address to fetch word from
             ret.length = 2;
-            ret.data[0] = htons(OPC_PUSHW_NEAR);
+            ret.data[0] = hton16(OPC_PUSHW_NEAR);
             ret.data[1] = l16(p0);
             break;
         case OPC_PUSH_REG: // p0: reg ID
             ret.length = 1;
-            ret.data[0] = htons(OPC_PUSH_REG) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_PUSH_REG) | hton16((p0&0xF)<<8);
             break;
         
         // SSP
         case OPC_SSP: // p0: address to put stack
             ret.length = 3;
-            ret.data[0] = htons(OPC_SSP);
+            ret.data[0] = hton16(OPC_SSP);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
@@ -427,65 +427,65 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         // POP
         case OPC_POP_REG: // p0: regid
             ret.length = 1;
-            ret.data[0] = htons(OPC_POP_REG) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_POP_REG) | hton16((p0&0xF)<<8);
             break;
         case OPC_POP_FAR: // p0: far address
             ret.length = 3;
-            ret.data[0] = htons(OPC_POP_FAR);
+            ret.data[0] = hton16(OPC_POP_FAR);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_POP_AD: // popad
             ret.length = 1;
-            ret.data[0] = htons(OPC_POP_AD);
+            ret.data[0] = hton16(OPC_POP_AD);
             break;
         case OPC_POP_NEAR: // p0: near address
             ret.length = 2;
-            ret.data[0] = htons(OPC_POP_NEAR);
+            ret.data[0] = hton16(OPC_POP_NEAR);
             ret.data[1] = l16(p0);
             break;
 
         // CALL
         case OPC_CALL_FAR: // p0: far address
             ret.length = 3;
-            ret.data[0] = htons(OPC_CALL_FAR);
+            ret.data[0] = hton16(OPC_CALL_FAR);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_CALL_NEAR: // p0: near address
             ret.length = 2;
-            ret.data[0] = htons(OPC_CALL_NEAR);
+            ret.data[0] = hton16(OPC_CALL_NEAR);
             ret.data[1] = l16(p0);
             break;
 
         // RET
         case OPC_RET:
             ret.length = 1;
-            ret.data[0] = htons(OPC_RET);
+            ret.data[0] = hton16(OPC_RET);
             break;
 
         // IEN
         case OPC_IEN:
             ret.length = 1;
-            ret.data[0] = htons(OPC_IEN);
+            ret.data[0] = hton16(OPC_IEN);
             break;
 
         // SINT
         case OPC_SINT:
             ret.length = 1;
-            ret.data[0] = htons(OPC_SINT);
+            ret.data[0] = hton16(OPC_SINT);
             break;
 
         // MMOV
         case OPC_MMOV_ST: // p0: destination mgmt addr, p1: source reg
             ret.length = 3;
-            ret.data[0] = htons(OPC_MMOV_ST) | htons((p1&0xF)<<8);
+            ret.data[0] = hton16(OPC_MMOV_ST) | hton16((p1&0xF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_MMOV_LD: // p0: dest reg, p1: source mgmt addr
             ret.length = 3;
-            ret.data[0] = htons(OPC_MMOV_LD) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_MMOV_LD) | hton16((p0&0xF)<<8);
             ret.data[1] = u16(p1);
             ret.data[2] = l16(p1);
             break;
@@ -493,19 +493,19 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         // IMOV
         case OPC_IMOV_LD: // p0: dest reg, p1: source addr
             ret.length = 3;
-            ret.data[0] = htons(OPC_IMOV_LD) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(OPC_IMOV_LD) | hton16((p0&0xF)<<8);
             ret.data[1] = u16(p1);
             ret.data[2] = l16(p1);
             break;
         case OPC_IMOV_ST: // p0: dest addr, p1: source reg
             ret.length = 3;
-            ret.data[0] = htons(OPC_IMOV_ST) | htons((p1&0xF)<<8);
+            ret.data[0] = hton16(OPC_IMOV_ST) | hton16((p1&0xF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_IMOV_ST_IMM: // p0: dest addr, p1: imm value
             ret.length = 4;
-            ret.data[0] = htons(OPC_IMOV_ST_IMM);
+            ret.data[0] = hton16(OPC_IMOV_ST_IMM);
             ret.data[1] = l16(p1);
             ret.data[2] = u16(p0);
             ret.data[3] = l16(p0);
@@ -514,24 +514,24 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         // BRCH
         case OPC_BRCH_FLG_FAR: // p0: addr, p1: flags to test
             ret.length = 3;
-            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xFF)<<8);
+            ret.data[0] = hton16(OPC_BRCH_FLG_FAR) | hton16((p1&0xFF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_BRCH_FLG_NEAR: // p0: addr, p1: flags to test
             ret.length = 2;
-            ret.data[0] = htons(OPC_BRCH_FLG_FAR) | htons((p1&0xFF)<<8);
+            ret.data[0] = hton16(OPC_BRCH_FLG_FAR) | hton16((p1&0xFF)<<8);
             ret.data[1] = l16(p0);
             break;
         case OPC_BRCH_IV_FAR: // p0: addr, p1: IV to test
             ret.length = 3;
-            ret.data[0] = htons(OPC_BRCH_IV_FAR) | htons((p1&0xFF)<<8);
+            ret.data[0] = hton16(OPC_BRCH_IV_FAR) | hton16((p1&0xFF)<<8);
             ret.data[1] = u16(p0);
             ret.data[2] = l16(p0);
             break;
         case OPC_BRCH_IV_NEAR: // p0: addr, p1: IV to test
             ret.length = 2;
-            ret.data[0] = htons(OPC_BRCH_IV_FAR) | htons((p1&0xFF)<<8);
+            ret.data[0] = hton16(OPC_BRCH_IV_FAR) | hton16((p1&0xFF)<<8);
             ret.data[1] = l16(p0);
             break;
 
@@ -540,13 +540,13 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
         case OPC_IMOV_RSA:
         case OPC_MOV_RSA:
             ret.length = 1;
-            ret.data[0] = htons(opcode) | htons((p0&0xF)<<12) | htons((p1&0xF)<<8);
+            ret.data[0] = hton16(opcode) | hton16((p0&0xF)<<12) | hton16((p1&0xF)<<8);
             break;
 
         case OPC_MMOV_RSA_LOAD:
         case OPC_MOV_RSA_LOAD: // emovl
             ret.length = 1;
-            ret.data[0] = htons(opcode) | htons((p1&0xF)<<12) | htons((p0&0xF)<<8);
+            ret.data[0] = hton16(opcode) | hton16((p1&0xF)<<12) | hton16((p0&0xF)<<8);
             break;
 
 
@@ -760,7 +760,7 @@ struct assembled_insn_t handle_special_cases(char* data) {
 
         ret.length = strlen(val);
         for (int i=0;i<strlen(val);i++) {
-            ret.data[i] = htons((uint16_t)val[i]);
+            ret.data[i] = hton16((uint16_t)val[i]);
         }
 
         pcre_free_substring(val);
