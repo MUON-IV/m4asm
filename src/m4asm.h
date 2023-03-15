@@ -5,12 +5,13 @@ typedef unsigned int uint32_t;
 typedef unsigned short uint16_t;
 
 #include "label.h"
+#include "lib/endianness/endianness.h"
 #include <ctype.h>
 #include <pcre.h>
 #define STRTOLOWER(v) for (int i=0;i<strlen(v);i++) v[i]=tolower(v[i]);
 
-#define l16(x) (htonl(x)&0xFFFF0000)>>16
-#define u16(x) (htonl(x)&0xFFFF)
+#define l16(x) (hton32(x)&0xFFFF0000)>>16
+#define u16(x) (hton32(x)&0xFFFF)
 
 struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint32_t p2, uint32_t p3);
 struct assembled_insn_t parse_and_assemble_insn(char* data, struct le_context *lctx);
