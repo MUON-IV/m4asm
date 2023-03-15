@@ -2,16 +2,14 @@
 #include <stdio.h>
 #include <string.h>
 #include <errno.h>
+#include <pcre.h>
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__NT__)
 #include <winsock.h>
-#include "getopt/getopt.h"
-#include "strsep/strsep.h"
 #else
 #include <arpa/inet.h>
-#include <unistd.h>
-#include <getopt.h>
-#include <pcre.h>
 #endif
+#include "getopt/getopt.h"
+#include "strsep/strsep.h"
 #include "label.h"
 #include "m4asm.h"
 #include "insns.h"
