@@ -593,7 +593,15 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
     struct parsed_param_t ret;
     ret.type = 'X';
     ret.code = 1;
-    if (cpy[0] == '[' && p[strlen(cpy) - 1] == ']') { // FAR pointer [0xDEADBEEF]
+    if (cpy[0] == '+' || cpy[0] == '-') {
+        struct parsed_int_t iv = getintval(cpy+1);
+        if (iv.code != 0 || iv.value > 0xFFFF) {
+            fprintf(stderr, "Error: Invalid parameter value (PTYPE_RELATIVE): %s\n", p);
+            exit(EXIT_FAILURE);
+        }
+        ret.code = 0;
+        ret.type = PTYPE_RELATIVE;
+    } else if (cpy[0] == '[' && p[strlen(cpy) - 1] == ']') { // FAR pointer [0xDEADBEEF]
         cpy[strlen(cpy) - 1] = 0;
         ret.code = 0;
         struct parsed_int_t iv = getintval(cpy+1);
