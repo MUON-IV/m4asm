@@ -7,7 +7,8 @@
 // JMP
 #define OPC_JMP_FAR 0x02
 #define OPC_JMP_NEAR 0x37
-#define OPC_JMP_REL 0x58
+#define OPC_JMP_REL_POS 0x58
+#define OPC_JMP_REL_NEG 0x5E
 
 // MOV
 // I2R      = INDIRECT MOV LOAD
@@ -139,7 +140,8 @@ struct parsed_int_t {
 #define PTYPE_FAR_PTR 'f'  // [0xDEADBEEF]
 #define PTYPE_REGPAIR_PTR 'p' // [r1:r2]
 #define PTYPE_CSTRING 's' // "abcd"
-#define PTYPE_RELATIVE 'r' // +5, -5
+#define PTYPE_RELATIVE_POS '+' // +5
+#define PTYPE_RELATIVE_NEG '-' // -5
 
 #include <stddef.h>
 
@@ -156,7 +158,8 @@ static struct insn_def_t insns[] = {
 
     {"jmp"  , OPC_JMP_FAR       , 3, 4, "D"},
     {"jmp"  , OPC_JMP_NEAR      , 2, 4, "W"},
-    {"jmp"  , OPC_JMP_REL       , 2, 10,"r"},
+    {"jmp"  , OPC_JMP_REL_POS   , 2, 10,"+"},
+    {"jmp"  , OPC_JMP_REL_NEG   , 2, 10,"-"},
 
     {"mov"  , OPC_MOV_I2R_NEAR  , 2, 4, "Rn"},
     {"mov"  , OPC_MOV_I2R_FAR   , 3, 4, "Rf"},

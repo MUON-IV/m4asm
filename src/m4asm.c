@@ -269,6 +269,12 @@ struct assembled_insn_t assemble_insn(int opcode, uint32_t p0, uint32_t p1, uint
             ret.data[0] = hton16(OPC_JMP_NEAR);
             ret.data[1] = l16(p0);
             break;
+        case OPC_JMP_REL_POS: // p0: DDDD section
+        case OPC_JMP_REL_NEG:
+            ret.length = 2;
+            ret.data[0] = hton16(opcode) | hton16(0x8<<8);
+            ret.data[1] = l16(p0);
+            break;
 
         // MOVs
         case OPC_MOV_I2R_NEAR: // p0: register to move value to, p1: near address to load from
@@ -600,7 +606,18 @@ struct parsed_param_t parse_param(char* p, struct le_context *lctx) {
             exit(EXIT_FAILURE);
         }
         ret.code = 0;
-        ret.type = PTYPE_RELATIVE;
+        if (cpy[0] == '+') {
+            ret.type = PTYPE_RELATIVE_POS;
+            ret.value = iv.value - 2;
+            if (iv.value < 2) {
+                fprintf(stderr, "Error: Invalid parameter value (PTYPE_RELATIVE_POS): %s\n", p);
+                exit(EXIT_FAILURE);
+            }
+        }
+        if (cpy[0] == '-') {
+            ret.type = PTYPE_RELATIVE_NEG;
+            ret.value = iv.value + 2;
+        }
     } else if (cpy[0] == '[' && p[strlen(cpy) - 1] == ']') { // FAR pointer [0xDEADBEEF]
         cpy[strlen(cpy) - 1] = 0;
         ret.code = 0;
